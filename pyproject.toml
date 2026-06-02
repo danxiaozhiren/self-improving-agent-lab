@@ -1,0 +1,11 @@
+[project]
+name = "self-improving-agent-lab"
+version = "0.1.0"
+description = "Learning notes and experiments for self-improving AI agents."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
