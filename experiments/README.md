@@ -12,6 +12,14 @@ Question: does a reflection memory improve repeated article-summary tasks?
 2. Save traces as JSONL.
 3. Score outputs with a rubric.
 
+Run the current placeholder baseline:
+
+```bash
+python3 experiments/run_baseline.py
+```
+
+This reads `experiments/tasks/article_summary_v0.jsonl` and writes traces to `runs/baseline-v0.jsonl`.
+
 ### Reflection Pass
 
 1. Read failed or weak traces.
@@ -35,6 +43,7 @@ Question: does a reflection memory improve repeated article-summary tasks?
 {
   "task_id": "summary-001",
   "workflow_version": "baseline-v0",
+  "started_at": "2026-06-02T00:00:00+00:00",
   "input": {},
   "steps": [],
   "output": "",

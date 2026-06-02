@@ -1,5 +1,7 @@
 # self-improving-agent-lab
 
+[English](README.md) | [中文](README.zh-CN.md)
+
 Learning notes and small experiments for self-improving AI agents.
 
 This repository studies how agent systems can improve without retraining model weights. The practical loop is:
@@ -18,6 +20,7 @@ The first target is a small research-assistant lab for article summarization and
 ## Repository Layout
 
 ```text
+articles/      Chinese article series based on experiments and source notes.
 docs/          Reading roadmap, source labels, and article outlines.
 experiments/   Small runnable experiments and result logs.
 src/           Minimal Python package for agent-loop components.
