@@ -4,6 +4,8 @@
 
 Goal: understand an agent as a loop, not a single prompt.
 
+First experiment scope: article summary only. Technical-route analysis should wait until the summary loop has stable tasks, trace shape, and evaluator behavior.
+
 Read and build:
 
 - Minimal loop: model call, tool request, tool execution, tool result, next model call.

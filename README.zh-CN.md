@@ -15,7 +15,7 @@
 
 ## 范围
 
-第一个目标是搭建一个小型 research-assistant lab，用于文章总结和技术路线分析。实现会保持足够简单，便于检查：Python、JSONL/SQLite、Markdown 笔记和可复现的任务集。
+第一个目标是搭建一个小型 research-assistant lab，并且第一阶段只做文章总结。技术路线分析先后置，等文章总结闭环具备可信 rubric、固定任务集、trace 格式和 baseline 对比之后再扩展。实现会保持足够简单，便于检查：Python、JSONL/SQLite、Markdown 笔记和可复现的任务集。
 
 ## 仓库结构
 
@@ -29,12 +29,13 @@ tests/         回归测试和评估夹具。
 
 ## 第一批里程碑
 
-- [ ] 构建固定任务集，用于文章总结和重要性判断。
-- [ ] 将每次运行保存为结构化 trace。
-- [ ] 添加基于 rubric 的评估器。
+- [x] 构建固定任务集，用于文章总结。
+- [x] 将每次运行保存为结构化 trace。
+- [x] 将文章总结 rubric 具体化到每个分数都能解释。
+- [x] 将占位 baseline 替换成确定性 summary formatter。
 - [ ] 从失败案例生成 reflection notes。
 - [ ] 用版本历史保存 memory notes。
-- [ ] 对比 baseline 和 memory-enhanced runs。
+- [ ] 在 held-out 文章总结任务上对比 baseline 和 memory-enhanced runs。
 
 ## 来源状态标签
 

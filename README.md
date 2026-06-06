@@ -15,7 +15,7 @@ This repository studies how agent systems can improve without retraining model w
 
 ## Scope
 
-The first target is a small research-assistant lab for article summarization and technical-route analysis. It will keep the implementation simple enough to inspect: Python, JSONL/SQLite, Markdown notes, and reproducible task sets.
+The first target is a small research-assistant lab for article summarization only. Technical-route analysis is intentionally postponed until the article-summary loop has a credible rubric, fixed task set, trace format, and baseline comparison. The implementation will stay simple enough to inspect: Python, JSONL/SQLite, Markdown notes, and reproducible task sets.
 
 ## Repository Layout
 
@@ -29,12 +29,13 @@ tests/         Regression tests and evaluation fixtures.
 
 ## First Milestones
 
-- [ ] Build a fixed task set for article summary and importance judgment.
-- [ ] Save each run as a structured trace.
-- [ ] Add a rubric-based evaluator.
+- [x] Build a fixed task set for article summary.
+- [x] Save each run as a structured trace.
+- [x] Make the article-summary rubric concrete enough to explain each score.
+- [x] Replace the placeholder baseline with a deterministic summary formatter.
 - [ ] Generate reflection notes from failed cases.
 - [ ] Store memory notes with version history.
-- [ ] Compare baseline vs memory-enhanced runs.
+- [ ] Compare baseline vs memory-enhanced runs on held-out article-summary tasks.
 
 ## Source Status Labels
 

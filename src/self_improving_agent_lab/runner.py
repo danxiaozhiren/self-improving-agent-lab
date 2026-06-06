@@ -85,14 +85,19 @@ class RunTrace:
 
 
 def run_baseline(task: Task, workflow_version: str = "baseline-v0") -> RunTrace:
-    """Run a deterministic placeholder workflow.
+    """Run a deterministic baseline workflow.
 
-    This intentionally avoids any model SDK. The first implementation step is to
-    replace this placeholder with a real model/tool loop while preserving trace
-    shape.
+    This intentionally avoids any model SDK. It gives the experiment a stable
+    baseline before adding model calls, reflection memory, or judge agents.
     """
+
+    from self_improving_agent_lab.formatter import format_article_summary
 
     trace = RunTrace.start(task, workflow_version)
     trace.add_step("receive_task", kind=task.kind, input_keys=sorted(task.input.keys()))
-    trace.output = "TODO: connect model/tool loop"
+    if task.kind == "article_summary":
+        trace.output = format_article_summary(task)
+        trace.add_step("format_article_summary", strategy="deterministic-v0")
+    else:
+        trace.output = f"TODO: unsupported task kind {task.kind}"
     return trace

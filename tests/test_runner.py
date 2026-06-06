@@ -66,7 +66,12 @@ def test_baseline_trace_is_json_serializable() -> None:
     task = Task(
         task_id="summary-001",
         kind="article_summary",
-        input={"title": "Agent loops", "url": "https://example.com/agent-loops"},
+        input={
+            "title": "Agent loops",
+            "url": "https://example.com/agent-loops",
+            "source_status": "author_inference",
+            "article_excerpt": "Agent loops make tool use observable.",
+        },
     )
 
     trace = run_baseline(task)
@@ -77,16 +82,25 @@ def test_baseline_trace_is_json_serializable() -> None:
     assert payload["input"] == {
         "title": "Agent loops",
         "url": "https://example.com/agent-loops",
+        "source_status": "author_inference",
+        "article_excerpt": "Agent loops make tool use observable.",
     }
     assert payload["steps"] == [
         {
             "name": "receive_task",
             "payload": {
                 "kind": "article_summary",
-                "input_keys": ["title", "url"],
+                "input_keys": ["article_excerpt", "source_status", "title", "url"],
+            },
+        },
+        {
+            "name": "format_article_summary",
+            "payload": {
+                "strategy": "deterministic-v0",
             },
         }
     ]
+    assert "Source status: author_inference." in payload["output"]
     assert payload["scores"] == {}
     datetime.fromisoformat(payload["started_at"])
 
@@ -120,19 +134,19 @@ def test_baseline_jsonl_runner_writes_trace_file(tmp_path) -> None:
     assert payload["input"]["title"] == "Trace discipline"
     assert payload["workflow_version"] == "baseline-v0"
     assert payload["scores"] == {
-        "format_validity": 0.0,
-        "has_mechanism": 1.0,
-        "has_takeaway": 0.0,
-        "mentions_source_status": 0.0,
+        "engineering_takeaway": 1.0,
+        "format_validity": 1.0,
+        "mechanism_coverage": 1.0,
+        "source_status_grounding": 1.0,
     }
     assert payload["steps"][-1] == {
         "name": "evaluate_trace",
         "payload": {
             "rubric_keys": [
+                "engineering_takeaway",
                 "format_validity",
-                "has_mechanism",
-                "has_takeaway",
-                "mentions_source_status",
+                "mechanism_coverage",
+                "source_status_grounding",
             ],
         },
     }

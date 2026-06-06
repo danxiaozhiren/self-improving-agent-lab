@@ -43,7 +43,7 @@ task -> run -> trace -> evaluate -> reflect -> update workflow/memory -> rerun
 
 ## 最小实验
 
-当前仓库先做了一个很小的 baseline 实验，还没有接真实 LLM。
+当前仓库先做了一个很小的 baseline 实验，还没有接真实 LLM。这个 baseline 是确定性 formatter：它不推理、不检索、不扩展事实，只把任务输入拼成符合当前 rubric 的摘要结构。
 
 固定任务集在：
 
@@ -73,13 +73,16 @@ experiments/tasks/article_summary_v0.jsonl
   -> runs/baseline-v0.jsonl
 ```
 
-当前 `run_baseline()` 仍然是占位实现，只返回：
+当前 `run_baseline()` 会为 `article_summary` 任务生成一段确定性输出，核心结构是：
 
 ```text
-TODO: connect model/tool loop
+Source status: ...
+Summary: ...
+Mechanism: ...
+Engineering takeaway: ...
 ```
 
-这很刻意。第一步不是假装已经有智能，而是先把可复现任务、结构化 trace 和评分管道搭起来。
+这仍然不代表系统已经有智能。第一步不是假装模型会总结，而是先把可复现任务、结构化 trace、评分管道和一个可对比 baseline 搭起来。
 
 ## 实验观察
 
@@ -87,7 +90,7 @@ TODO: connect model/tool loop
 
 ```text
 python3 -m pytest
-9 passed
+12 passed
 ```
 
 baseline 运行结果：
@@ -109,14 +112,15 @@ Wrote 3 traces to /Users/abi/Documents/project/personal/self-improving-agent-lab
   },
   "steps": [
     {"name": "receive_task"},
+    {"name": "format_article_summary"},
     {"name": "evaluate_trace"}
   ],
-  "output": "TODO: connect model/tool loop",
+  "output": "Source status: paper_claims.\nSummary: Self-Refine - ...\nMechanism: ...\nEngineering takeaway: ...",
   "scores": {
-    "format_validity": 0.0,
-    "has_mechanism": 1.0,
-    "has_takeaway": 0.0,
-    "mentions_source_status": 0.0
+    "engineering_takeaway": 1.0,
+    "format_validity": 1.0,
+    "mechanism_coverage": 1.0,
+    "source_status_grounding": 1.0
   },
   "reflection": ""
 }
@@ -124,11 +128,11 @@ Wrote 3 traces to /Users/abi/Documents/project/personal/self-improving-agent-lab
 
 这个结果说明两件事。
 
-第一，当前 baseline 明确失败：`format_validity` 是 0，说明占位输出不能算有效答案；`mentions_source_status` 是 0，说明它没有遵守来源标签要求；`has_takeaway` 是 0，说明没有给出工程启发。
+第一，当前 baseline 已经不是空跑。它能保留任务输入里的 `source_status`，能生成稳定的 summary / mechanism / engineering takeaway 结构，也能被 evaluator 复现地打分。
 
-第二，当前 evaluator 也暴露了一个局限：`has_mechanism` 得到 1，只是因为占位输出里出现了 `model/tool loop` 这样的关键词。这说明第一版规则评分只能作为粗筛，不能当成最终质量判断。
+第二，高分不等于高质量。这个 formatter 明确知道 rubric 需要什么字段，所以它可能是在“满足评分器”，而不是在真正理解文章。这说明当前 rubric 可以作为格式和纪律约束，但还不能证明摘要质量。
 
-这正是自改进实验需要 trace 的原因：我们不仅能看到答案差，也能看到评估器哪里粗糙。
+这正是自改进实验需要 trace 的原因：我们不仅要看到分数，也要看到分数是怎么被拿到的。
 
 ## 工程启发
 
@@ -136,7 +140,7 @@ Wrote 3 traces to /Users/abi/Documents/project/personal/self-improving-agent-lab
 
 第二，trace shape 要早定下来。后面无论接 LLM、工具调用、reflection memory 还是 judge agent，都应该继续保留 `task_id`、`workflow_version`、`input`、`steps`、`output`、`scores` 和 `reflection`。
 
-第三，rubric 可以先粗糙，但必须可解释。当前规则型 evaluator 明显不完美，不过它能暴露 baseline 的失败，也能暴露自己的误判点。
+第三，rubric 可以先粗糙，但必须可解释。当前规则型 evaluator 明显不完美，不过它能暴露 baseline 是如何拿分的，也能暴露自己的误判点。
 
 第四，memory 应该来自失败压缩，而不是来自完整记录堆积。下一步真正有价值的不是“保存更多文本”，而是从失败 trace 中提炼可复用规则。
 
@@ -144,7 +148,7 @@ Wrote 3 traces to /Users/abi/Documents/project/personal/self-improving-agent-lab
 
 下一轮实验可以从两个方向继续：
 
-1. 把 baseline 从占位输出升级成一个确定性 summary formatter。
-2. 改进 evaluator，让 `has_mechanism` 不再只靠单个关键词命中。
+1. 增加 negative examples，防止 formatter 通过关键词堆叠骗过 rubric。
+2. 设计 train/eval task split，为后续 reflection memory 实验做准备。
 
 这篇文章的结论很朴素：**自改进 Agent 的第一步不是让模型变聪明，而是让系统知道自己上一次哪里做得不好。**

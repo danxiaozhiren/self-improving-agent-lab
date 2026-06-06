@@ -2,9 +2,11 @@
 
 This directory stores small, repeatable experiments.
 
-## v0 Experiment: Summary Agent With Reflection
+## v0 Experiment: Article Summary Agent With Reflection
 
 Question: does a reflection memory improve repeated article-summary tasks?
+
+Scope guard: this experiment only covers `article_summary`. Technical-route analysis is a later experiment with different metrics.
 
 ### Baseline
 
@@ -12,7 +14,7 @@ Question: does a reflection memory improve repeated article-summary tasks?
 2. Save traces as JSONL.
 3. Score outputs with a rubric.
 
-Run the current placeholder baseline:
+Run the current deterministic baseline:
 
 ```bash
 python3 experiments/run_baseline.py
@@ -31,11 +33,13 @@ This reads `experiments/tasks/article_summary_v0.jsonl` and writes traces to `ru
 ### Metrics
 
 - Format validity.
-- Factual grounding.
-- Completeness.
-- Actionability.
-- Manual edit distance.
+- Source-status grounding.
+- Mechanism coverage.
+- Engineering takeaway.
 - Repeated failure count.
+- Manual review notes for high-scoring but bad outputs.
+
+See `docs/rubric-article-summary.md` for the concrete first-pass rubric and `docs/memory-experiment-design.md` for the baseline vs memory-enhanced comparison rules.
 
 ### Trace Shape
 
