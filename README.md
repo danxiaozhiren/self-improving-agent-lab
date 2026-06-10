@@ -33,9 +33,11 @@ tests/         Regression tests and evaluation fixtures.
 - [x] Save each run as a structured trace.
 - [x] Make the article-summary rubric concrete enough to explain each score.
 - [x] Replace the placeholder baseline with a deterministic summary formatter.
-- [ ] Generate reflection notes from failed cases.
-- [ ] Store memory notes with version history.
-- [ ] Compare baseline vs memory-enhanced runs on held-out article-summary tasks.
+- [x] Generate a train-only reflection memory artifact.
+- [x] Store memory notes with version history.
+- [ ] Generate reflection notes from actual low-score failure cases.
+- [x] Compare baseline vs memory-enhanced runs on held-out article-summary tasks.
+- [ ] Produce a memory-enhanced run with a defensible held-out improvement.
 
 ## Source Status Labels
 

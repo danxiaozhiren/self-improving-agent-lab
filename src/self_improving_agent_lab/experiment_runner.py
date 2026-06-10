@@ -9,6 +9,9 @@ from typing import Optional
 from self_improving_agent_lab.evaluator import evaluate_trace
 from self_improving_agent_lab.runner import RunTrace, Task, run_baseline
 
+DEFAULT_TASK_PATH = Path("experiments/tasks/article_summary_eval_v0.jsonl")
+DEFAULT_OUTPUT_PATH = Path("runs/baseline-v0-eval.jsonl")
+
 
 def load_tasks_jsonl(path: Path) -> list[Task]:
     tasks: list[Task] = []
@@ -62,13 +65,13 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser.add_argument(
         "--tasks",
         type=Path,
-        default=Path("experiments/tasks/article_summary_v0.jsonl"),
+        default=DEFAULT_TASK_PATH,
         help="Path to the input task JSONL file.",
     )
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("runs/baseline-v0.jsonl"),
+        default=DEFAULT_OUTPUT_PATH,
         help="Path for the output trace JSONL file.",
     )
     parser.add_argument(

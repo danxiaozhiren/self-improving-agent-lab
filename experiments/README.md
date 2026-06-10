@@ -10,7 +10,7 @@ Scope guard: this experiment only covers `article_summary`. Technical-route anal
 
 ### Baseline
 
-1. Run a fixed set of article-summary tasks.
+1. Run a fixed held-out set of article-summary tasks.
 2. Save traces as JSONL.
 3. Score outputs with a rubric.
 
@@ -20,7 +20,15 @@ Run the current deterministic baseline:
 python3 experiments/run_baseline.py
 ```
 
-This reads `experiments/tasks/article_summary_v0.jsonl` and writes traces to `runs/baseline-v0.jsonl`.
+This reads `experiments/tasks/article_summary_eval_v0.jsonl` and writes traces to `runs/baseline-v0-eval.jsonl`.
+
+### Task Split
+
+- `experiments/tasks/article_summary_train_v0.jsonl`: tasks that may be inspected when generating reflection notes or memory rules.
+- `experiments/tasks/article_summary_eval_v0.jsonl`: held-out tasks for baseline vs memory-enhanced comparison.
+- `experiments/tasks/article_summary_v0.jsonl`: initial smoke set kept for simple runner checks.
+
+The train and eval task IDs and titles should stay disjoint. Memory notes must not copy eval task facts or final answers.
 
 ### Reflection Pass
 
@@ -29,6 +37,22 @@ This reads `experiments/tasks/article_summary_v0.jsonl` and writes traces to `ru
 3. Store notes in a memory file.
 4. Re-run the same task set with memory enabled.
 5. Compare scores and failure types.
+
+Generate the first train-only reflection memory:
+
+```bash
+python3 experiments/generate_reflection_memory.py
+```
+
+This reads `experiments/tasks/article_summary_train_v0.jsonl`, writes train traces to `runs/baseline-v0-train.jsonl`, and writes versioned memory notes to `memories/article-summary-reflection-v0.md`.
+
+Run the memory-enhanced eval comparison:
+
+```bash
+python3 experiments/run_memory_enhanced.py
+```
+
+This writes `runs/memory-v0-eval.jsonl` and `reports/baseline-vs-memory-v0.md`. The report must be read as a comparison result, not as proof of improvement.
 
 ### Metrics
 

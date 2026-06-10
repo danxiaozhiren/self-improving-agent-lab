@@ -14,10 +14,12 @@ Only `article_summary` tasks are included in the first loop. Technical-route ana
 
 Use two task sets:
 
-- `train` tasks: the agent may inspect failed traces and generate memory notes from these tasks.
-- `eval` tasks: the agent must not use task-specific answers from these tasks when writing memory.
+- `experiments/tasks/article_summary_train_v0.jsonl`: the agent may inspect failed traces and generate memory notes from these tasks.
+- `experiments/tasks/article_summary_eval_v0.jsonl`: the agent must not use task-specific answers from these tasks when writing memory.
 
 Memory-enhanced runs are only credible when compared on the same held-out `eval` task set.
+
+The older `experiments/tasks/article_summary_v0.jsonl` file is a smoke set, not the memory-experiment split.
 
 ## Memory Rules
 
@@ -35,6 +37,38 @@ Forbidden memory content:
 - Article-specific facts copied from eval inputs.
 - Hard-coded task IDs.
 - Any rule that depends on knowing the held-out answer.
+
+## First Memory Artifact
+
+The first generated memory file is:
+
+```text
+memories/article-summary-reflection-v0.md
+```
+
+Generate it with:
+
+```bash
+python3 experiments/generate_reflection_memory.py
+```
+
+The script runs baseline only on `experiments/tasks/article_summary_train_v0.jsonl`, stores intermediate train traces under `runs/`, and writes only aggregate scores plus reusable rules into the memory file.
+
+## Memory-Enhanced Comparison
+
+Run the first comparison with:
+
+```bash
+python3 experiments/run_memory_enhanced.py
+```
+
+The script runs both baseline and `memory-v0` on the held-out eval split, then writes:
+
+```text
+reports/baseline-vs-memory-v0.md
+```
+
+If the report shows no score delta, treat that as "no demonstrated improvement", even though the pipeline executed successfully.
 
 ## Comparison Metrics
 

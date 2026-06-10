@@ -33,9 +33,11 @@ tests/         回归测试和评估夹具。
 - [x] 将每次运行保存为结构化 trace。
 - [x] 将文章总结 rubric 具体化到每个分数都能解释。
 - [x] 将占位 baseline 替换成确定性 summary formatter。
-- [ ] 从失败案例生成 reflection notes。
-- [ ] 用版本历史保存 memory notes。
-- [ ] 在 held-out 文章总结任务上对比 baseline 和 memory-enhanced runs。
+- [x] 生成只基于 train split 的初版 reflection memory artifact。
+- [x] 用版本历史保存 memory notes。
+- [ ] 从真实低分失败案例生成 reflection notes。
+- [x] 在 held-out 文章总结任务上对比 baseline 和 memory-enhanced runs。
+- [ ] 产出一个在 held-out 任务上站得住的 memory-enhanced 改进。
 
 ## 来源状态标签
 

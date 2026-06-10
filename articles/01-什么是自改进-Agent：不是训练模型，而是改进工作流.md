@@ -48,14 +48,14 @@ task -> run -> trace -> evaluate -> reflect -> update workflow/memory -> rerun
 固定任务集在：
 
 ```text
-experiments/tasks/article_summary_v0.jsonl
+experiments/tasks/article_summary_eval_v0.jsonl
 ```
 
-里面有 3 个文章总结任务：
+默认 baseline 跑 held-out eval set，里面有 3 个文章总结任务：
 
-- `summary-001`: Self-Refine
-- `summary-002`: Reflexion
-- `summary-003`: Agent Trace Discipline
+- `summary-eval-001`: Agent Trace Discipline
+- `summary-eval-002`: Source Status Drift
+- `summary-eval-003`: Memory Leakage Risk
 
 运行命令是：
 
@@ -66,11 +66,11 @@ python3 experiments/run_baseline.py
 执行链路是：
 
 ```text
-experiments/tasks/article_summary_v0.jsonl
+experiments/tasks/article_summary_eval_v0.jsonl
   -> load_tasks_jsonl()
   -> run_baseline()
   -> evaluate_trace()
-  -> runs/baseline-v0.jsonl
+  -> runs/baseline-v0-eval.jsonl
 ```
 
 当前 `run_baseline()` 会为 `article_summary` 任务生成一段确定性输出，核心结构是：
@@ -90,32 +90,46 @@ Engineering takeaway: ...
 
 ```text
 python3 -m pytest
-12 passed
+21 passed
 ```
 
 baseline 运行结果：
 
 ```text
 python3 experiments/run_baseline.py
-Wrote 3 traces to /Users/abi/Documents/project/personal/self-improving-agent-lab/runs/baseline-v0.jsonl
+Wrote 3 traces to /Users/abi/Documents/project/personal/self-improving-agent-lab/runs/baseline-v0-eval.jsonl
+```
+
+train-only reflection memory 生成结果：
+
+```text
+python3 experiments/generate_reflection_memory.py
+Wrote reflection memory to /Users/abi/Documents/project/personal/self-improving-agent-lab/memories/article-summary-reflection-v0.md
+```
+
+memory-v0 对比结果：
+
+```text
+python3 experiments/run_memory_enhanced.py
+Wrote comparison report to /Users/abi/Documents/project/personal/self-improving-agent-lab/reports/baseline-vs-memory-v0.md
 ```
 
 一条 trace 的核心字段包括：
 
 ```json
 {
-  "task_id": "summary-001",
+  "task_id": "summary-eval-001",
   "workflow_version": "baseline-v0",
   "input": {
-    "title": "Self-Refine",
-    "source_status": "paper_claims"
+    "title": "Agent Trace Discipline",
+    "source_status": "author_inference"
   },
   "steps": [
     {"name": "receive_task"},
     {"name": "format_article_summary"},
     {"name": "evaluate_trace"}
   ],
-  "output": "Source status: paper_claims.\nSummary: Self-Refine - ...\nMechanism: ...\nEngineering takeaway: ...",
+  "output": "Source status: author_inference.\nSummary: Agent Trace Discipline - ...\nMechanism: ...\nEngineering takeaway: ...",
   "scores": {
     "engineering_takeaway": 1.0,
     "format_validity": 1.0,
@@ -142,13 +156,13 @@ Wrote 3 traces to /Users/abi/Documents/project/personal/self-improving-agent-lab
 
 第三，rubric 可以先粗糙，但必须可解释。当前规则型 evaluator 明显不完美，不过它能暴露 baseline 是如何拿分的，也能暴露自己的误判点。
 
-第四，memory 应该来自失败压缩，而不是来自完整记录堆积。下一步真正有价值的不是“保存更多文本”，而是从失败 trace 中提炼可复用规则。
+第四，memory 应该来自失败压缩，而不是来自完整记录堆积。当前第一版 memory 只记录 train split 的聚合分数和保守规则，不写任务标题、正文或答案；由于没有低分失败，而且 memory-v0 在 held-out eval 上没有分数提升，它只能算 preservation memory，还不能算证明了自改进。
 
 第五，这个项目的文章应该跟实验交替推进。代码给文章提供观察对象，文章再把观察转成下一轮实验问题。
 
 下一轮实验可以从两个方向继续：
 
-1. 增加 negative examples，防止 formatter 通过关键词堆叠骗过 rubric。
-2. 设计 train/eval task split，为后续 reflection memory 实验做准备。
+1. 继续增加 semantic negative examples，防止漂亮但空洞的摘要骗过 rubric。
+2. 实现 memory-enhanced run，并只在 held-out eval split 上和 baseline 对比。
 
 这篇文章的结论很朴素：**自改进 Agent 的第一步不是让模型变聪明，而是让系统知道自己上一次哪里做得不好。**

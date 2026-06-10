@@ -15,12 +15,25 @@ engineering_takeaway
 
 Each score is `0.0`, `0.5`, or `1.0`. The rule-based evaluator is not the final judge; it is a cheap guardrail that should catch obvious failures and produce inspectable signals for reflection.
 
+## Required Output Sections
+
+The first-pass evaluator expects these sections:
+
+```text
+Source status: ...
+Summary: ...
+Mechanism: ...
+Engineering takeaway: ...
+```
+
+Keyword stuffing outside the required sections should not earn mechanism or takeaway credit.
+
 ## format_validity
 
 Scores whether the output is a real answer rather than a placeholder.
 
-- `1.0`: The output is non-empty, not a TODO placeholder, and long enough to contain a meaningful summary.
-- `0.5`: The output is non-empty and not a TODO placeholder, but too short to be a useful summary.
+- `1.0`: The output is non-empty, not a TODO placeholder, long enough to contain a meaningful summary, and includes all required sections with non-trivial content.
+- `0.5`: The output is non-empty and not a TODO placeholder, but too short or missing one or more required sections.
 - `0.0`: The output is empty or starts with a TODO-style placeholder.
 
 ## source_status_grounding
@@ -28,8 +41,8 @@ Scores whether the output is a real answer rather than a placeholder.
 Scores whether the output preserves the source-status boundary from the task input.
 
 - `1.0`: The output explicitly mentions the expected source status, such as `paper_claims` or `author inference`.
-- `0.5`: The output mentions source status generally, but does not match the expected source status.
-- `0.0`: The output does not mention source status.
+- `0.5`: The `Source status` section exists, but does not match the expected source status.
+- `0.0`: The output does not include a `Source status` section.
 
 The goal is not just a header. Important claims in articles should still avoid presenting author inference, community implementation, or local observation as official facts.
 
@@ -37,9 +50,9 @@ The goal is not just a header. Important claims in articles should still avoid p
 
 Scores whether the output explains how the idea works.
 
-- `1.0`: The output contains at least two mechanism signals, such as loop, feedback, trace, workflow, memory, tool, mechanism, or their Chinese equivalents.
-- `0.5`: The output contains one mechanism signal.
-- `0.0`: The output contains no mechanism signal, or the output is a placeholder.
+- `1.0`: The `Mechanism` section contains at least two mechanism signals, such as loop, feedback, trace, workflow, memory, tool, mechanism, or their Chinese equivalents.
+- `0.5`: The `Mechanism` section contains one mechanism signal.
+- `0.0`: The `Mechanism` section is missing, contains no mechanism signal, or the output is a placeholder.
 
 This score is intentionally shallow. It checks whether a mechanism explanation is likely present; it does not prove the explanation is correct.
 
@@ -47,10 +60,24 @@ This score is intentionally shallow. It checks whether a mechanism explanation i
 
 Scores whether the output converts the summary into an actionable engineering implication.
 
-- `1.0`: The output contains at least two takeaway signals, such as engineering, takeaway, rule, SOP, should, next step, or their Chinese equivalents.
-- `0.5`: The output contains one takeaway signal.
-- `0.0`: The output contains no actionable engineering signal, or the output is a placeholder.
+- `1.0`: The `Engineering takeaway` section contains at least two takeaway signals, such as engineering, takeaway, rule, SOP, should, next step, or their Chinese equivalents.
+- `0.5`: The `Engineering takeaway` section contains one takeaway signal.
+- `0.0`: The `Engineering takeaway` section is missing, contains no actionable engineering signal, or the output is a placeholder.
+
+## Fixture Cases
+
+The evaluator is tested with `tests/fixtures/article_summary_eval_cases.jsonl`.
+
+Current fixture coverage:
+
+- good summary: all scores are `1.0`.
+- TODO placeholder: all scores are `0.0`.
+- keyword stuffing without sections: format gets only `0.5`, mechanism and takeaway stay `0.0`.
+- wrong source status: source grounding gets only `0.5`.
+- missing mechanism section: mechanism coverage is `0.0`.
+- missing engineering takeaway section: engineering takeaway is `0.0`.
+- thin sections: section-specific scores can receive `0.5`.
 
 ## Known Limits
 
-This rubric can be fooled by keyword stuffing. A later evaluator should add examples, negative cases, and possibly a judge model. Until then, trace review should treat scores as signals, not proof.
+This rubric now blocks the most obvious keyword-stuffing case, but it can still be fooled by polished shallow text. A later evaluator should add stronger semantic examples, negative cases, and possibly a judge model. Until then, trace review should treat scores as signals, not proof.

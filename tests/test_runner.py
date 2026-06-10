@@ -1,8 +1,17 @@
 import json
 from datetime import datetime
+from pathlib import Path
 
-from self_improving_agent_lab.experiment_runner import run_baseline_jsonl
+from self_improving_agent_lab.experiment_runner import (
+    DEFAULT_OUTPUT_PATH,
+    DEFAULT_TASK_PATH,
+    load_tasks_jsonl,
+    run_baseline_jsonl,
+)
 from self_improving_agent_lab.runner import RunTrace, Task, TraceStep, run_baseline
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_trace_step_serializes_to_dict() -> None:
@@ -150,3 +159,24 @@ def test_baseline_jsonl_runner_writes_trace_file(tmp_path) -> None:
             ],
         },
     }
+
+
+def test_baseline_defaults_to_held_out_eval_tasks() -> None:
+    assert DEFAULT_TASK_PATH == Path("experiments/tasks/article_summary_eval_v0.jsonl")
+    assert DEFAULT_OUTPUT_PATH == Path("runs/baseline-v0-eval.jsonl")
+
+
+def test_article_summary_train_and_eval_tasks_are_disjoint() -> None:
+    train_tasks = load_tasks_jsonl(PROJECT_ROOT / "experiments/tasks/article_summary_train_v0.jsonl")
+    eval_tasks = load_tasks_jsonl(PROJECT_ROOT / "experiments/tasks/article_summary_eval_v0.jsonl")
+
+    train_ids = {task.task_id for task in train_tasks}
+    eval_ids = {task.task_id for task in eval_tasks}
+    train_titles = {str(task.input["title"]) for task in train_tasks}
+    eval_titles = {str(task.input["title"]) for task in eval_tasks}
+
+    assert train_tasks
+    assert eval_tasks
+    assert train_ids.isdisjoint(eval_ids)
+    assert train_titles.isdisjoint(eval_titles)
+    assert {task.kind for task in train_tasks + eval_tasks} == {"article_summary"}

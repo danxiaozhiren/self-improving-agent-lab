@@ -12,8 +12,8 @@ from self_improving_agent_lab.experiment_runner import main
 if __name__ == "__main__":
     default_args = [
         "--tasks",
-        str(ROOT / "experiments/tasks/article_summary_v0.jsonl"),
+        str(ROOT / "experiments/tasks/article_summary_eval_v0.jsonl"),
         "--output",
-        str(ROOT / "runs/baseline-v0.jsonl"),
+        str(ROOT / "runs/baseline-v0-eval.jsonl"),
     ]
     raise SystemExit(main(sys.argv[1:] or default_args))
