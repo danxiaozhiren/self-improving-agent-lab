@@ -68,7 +68,17 @@ The script runs both baseline and `memory-v0` on the held-out eval split, then w
 reports/baseline-vs-memory-v0.md
 ```
 
-If the report shows no score delta, treat that as "no demonstrated improvement", even though the pipeline executed successfully.
+If the report shows no score delta, treat that as "no demonstrated improvement", even though the pipeline executed successfully. If the report shows a rubric delta, treat it as rubric-level evidence only until a manual semantic review checks whether the changed text is genuinely better.
+
+The first manual semantic review is recorded in:
+
+```text
+reports/memory-v0-semantic-review.md
+```
+
+Its current outcome is deliberately conservative: memory-v0 now produces a
+task-specific mechanism detail that passes the stricter review, but the
+improvement is still deterministic and template-driven.
 
 ## Comparison Metrics
 

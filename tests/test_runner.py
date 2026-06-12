@@ -145,6 +145,7 @@ def test_baseline_jsonl_runner_writes_trace_file(tmp_path) -> None:
     assert payload["scores"] == {
         "engineering_takeaway": 1.0,
         "format_validity": 1.0,
+        "input_specificity": 0.0,
         "mechanism_coverage": 1.0,
         "source_status_grounding": 1.0,
     }
@@ -154,6 +155,7 @@ def test_baseline_jsonl_runner_writes_trace_file(tmp_path) -> None:
             "rubric_keys": [
                 "engineering_takeaway",
                 "format_validity",
+                "input_specificity",
                 "mechanism_coverage",
                 "source_status_grounding",
             ],

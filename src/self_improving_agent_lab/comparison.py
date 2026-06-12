@@ -39,11 +39,13 @@ def render_comparison_report(
     baseline_trace_path: str,
     memory_trace_path: str,
     memory_path: str,
+    manual_review_path: str | None = None,
+    manual_review_summary: str | None = None,
 ) -> str:
     improved = any(row["delta"] > 0 for row in comparison.values())
     regressed = any(row["delta"] < 0 for row in comparison.values())
     if improved and not regressed:
-        conclusion = "Memory-v0 improved at least one rubric metric without a score regression."
+        conclusion = "Memory-v0 produced a rubric-level improvement on at least one metric without a score regression."
     elif regressed:
         conclusion = "Memory-v0 regressed at least one rubric metric; do not treat it as an improvement."
     else:
@@ -77,11 +79,30 @@ def render_comparison_report(
             "",
             conclusion,
             "",
+        ]
+    )
+    if manual_review_path:
+        lines.extend(
+            [
+                "## Manual Review",
+                "",
+                f"- Review path: `{manual_review_path}`",
+                (
+                    f"- Current review status: {manual_review_summary}"
+                    if manual_review_summary
+                    else "- Current review status: manual review is recorded separately."
+                ),
+                "",
+            ]
+        )
+
+    lines.extend(
+        [
             "## Interpretation Guard",
             "",
             "- A score tie is not evidence that memory helped.",
-            "- This report compares aggregate rubric scores only; manual review is still required.",
-            "- The memory file is preservation-oriented because no low-score train failures were observed.",
+            "- Manual review is required for any claimed semantic improvement.",
+            "- A rubric-score improvement is only meaningful when the changed metric reflects a real quality gap.",
             "",
         ]
     )

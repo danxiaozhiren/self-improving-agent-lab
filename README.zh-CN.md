@@ -37,7 +37,10 @@ tests/         回归测试和评估夹具。
 - [x] 用版本历史保存 memory notes。
 - [ ] 从真实低分失败案例生成 reflection notes。
 - [x] 在 held-out 文章总结任务上对比 baseline 和 memory-enhanced runs。
-- [ ] 产出一个在 held-out 任务上站得住的 memory-enhanced 改进。
+- [x] 产出一个在 held-out 任务上的 rubric-level memory-enhanced 改进。
+- [x] 用人工语义评审复核 memory-enhanced 的 rubric 改进。
+- [x] 收紧 `input_specificity`，避免孤立关键词列表被当作完整语义改进。
+- [ ] 增加比关键词列表更强的 semantic negative examples。
 
 ## 来源状态标签
 

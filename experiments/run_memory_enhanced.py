@@ -21,6 +21,7 @@ MEMORY_PATH = ROOT / "memories/article-summary-reflection-v0.md"
 BASELINE_TRACE_PATH = ROOT / "runs/baseline-v0-eval.jsonl"
 MEMORY_TRACE_PATH = ROOT / "runs/memory-v0-eval.jsonl"
 REPORT_PATH = ROOT / "reports/baseline-vs-memory-v0.md"
+MANUAL_REVIEW_PATH = ROOT / "reports/memory-v0-semantic-review.md"
 
 
 def main() -> int:
@@ -36,6 +37,11 @@ def main() -> int:
         baseline_trace_path=str(BASELINE_TRACE_PATH.relative_to(ROOT)),
         memory_trace_path=str(MEMORY_TRACE_PATH.relative_to(ROOT)),
         memory_path=str(MEMORY_PATH.relative_to(ROOT)),
+        manual_review_path=str(MANUAL_REVIEW_PATH.relative_to(ROOT)),
+        manual_review_summary=(
+            "task-specific mechanism improvement passes the stricter review, with residual "
+            "risk from deterministic template reuse."
+        ),
     )
     write_comparison_report(report_text, REPORT_PATH)
     print(f"Wrote comparison report to {REPORT_PATH}")

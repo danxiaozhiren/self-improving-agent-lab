@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Optional
 
 from self_improving_agent_lab.runner import RunTrace
 
@@ -10,6 +11,7 @@ RUBRIC_KEYS = (
     "source_status_grounding",
     "mechanism_coverage",
     "engineering_takeaway",
+    "input_specificity",
 )
 
 MIN_MEANINGFUL_OUTPUT_CHARS = 80
@@ -48,6 +50,68 @@ TAKEAWAY_SIGNALS = (
     "应该",
 )
 
+SEMANTIC_LINK_SIGNALS = (
+    "because",
+    "causes",
+    "connects",
+    "enables",
+    "explains",
+    "keeps",
+    "prevents",
+    "shows",
+    "so that",
+    "supports",
+    "therefore",
+    "which",
+)
+
+KEYWORD_STOPWORDS = {
+    "about",
+    "across",
+    "after",
+    "agent",
+    "answer",
+    "article",
+    "before",
+    "being",
+    "claim",
+    "clear",
+    "compared",
+    "could",
+    "every",
+    "final",
+    "first",
+    "feedback",
+    "input",
+    "later",
+    "memory",
+    "mechanism",
+    "model",
+    "notes",
+    "other",
+    "output",
+    "paper",
+    "rules",
+    "runs",
+    "should",
+    "signals",
+    "source",
+    "status",
+    "summary",
+    "system",
+    "tasks",
+    "their",
+    "there",
+    "these",
+    "trace",
+    "using",
+    "where",
+    "which",
+    "while",
+    "workflow",
+    "would",
+}
+
 
 @dataclass(frozen=True)
 class SummarySections:
@@ -63,14 +127,20 @@ def evaluate_trace(trace: RunTrace) -> dict[str, float]:
     return evaluate_article_summary_output(
         output=trace.output,
         source_status=str(trace.input.get("source_status", "")),
+        task_input=trace.input,
     )
 
 
-def evaluate_article_summary_output(output: str, source_status: str) -> dict[str, float]:
+def evaluate_article_summary_output(
+    output: str,
+    source_status: str,
+    task_input: Optional[dict[str, object]] = None,
+) -> dict[str, float]:
     normalized = output.strip().lower()
     expected_source = source_status.strip().lower()
     is_placeholder = _is_placeholder(normalized)
     sections = _parse_summary_sections(output)
+    task_input = task_input or {}
 
     return {
         "format_validity": _score_format_validity(normalized, sections),
@@ -81,6 +151,7 @@ def evaluate_article_summary_output(output: str, source_status: str) -> dict[str
             TAKEAWAY_SIGNALS,
             is_placeholder,
         ),
+        "input_specificity": _score_input_specificity(sections.mechanism, task_input, is_placeholder),
     }
 
 
@@ -193,6 +264,54 @@ def _score_section_signal_coverage(
     if len(hits) == 1:
         return 0.5
     return 0.0
+
+
+def _score_input_specificity(
+    mechanism_section: str,
+    task_input: dict[str, object],
+    is_placeholder: bool,
+) -> float:
+    if is_placeholder:
+        return 0.0
+    normalized_section = mechanism_section.strip().lower()
+    if not normalized_section:
+        return 0.0
+    title = str(task_input.get("title", "")).strip().lower()
+    title_hit = bool(title and title in normalized_section)
+    keywords = _input_keywords(task_input)
+    hits = {keyword for keyword in keywords if keyword in normalized_section}
+    if not title_hit and not hits:
+        return 0.0
+    if _has_semantic_link(normalized_section) and (len(hits) >= 2 or (title_hit and hits)):
+        return 1.0
+    return 0.5
+
+
+def _has_semantic_link(normalized_section: str) -> bool:
+    return any(signal in normalized_section for signal in SEMANTIC_LINK_SIGNALS)
+
+
+def _input_keywords(task_input: dict[str, object]) -> set[str]:
+    source_text = " ".join(
+        str(task_input.get(key, ""))
+        for key in ("title", "article_excerpt", "summary_goal")
+    ).lower()
+    words: set[str] = set()
+    current = []
+    for char in source_text:
+        if char.isalnum():
+            current.append(char)
+            continue
+        if current:
+            word = "".join(current)
+            if len(word) >= 6 and word not in KEYWORD_STOPWORDS:
+                words.add(word)
+            current = []
+    if current:
+        word = "".join(current)
+        if len(word) >= 6 and word not in KEYWORD_STOPWORDS:
+            words.add(word)
+    return words
 
 
 def _is_placeholder(normalized_output: str) -> bool:

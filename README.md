@@ -37,7 +37,10 @@ tests/         Regression tests and evaluation fixtures.
 - [x] Store memory notes with version history.
 - [ ] Generate reflection notes from actual low-score failure cases.
 - [x] Compare baseline vs memory-enhanced runs on held-out article-summary tasks.
-- [ ] Produce a memory-enhanced run with a defensible held-out improvement.
+- [x] Produce a memory-enhanced run with a held-out rubric improvement.
+- [x] Review the memory-enhanced rubric improvement with manual semantic notes.
+- [x] Tighten `input_specificity` so isolated keyword lists cannot pass as semantic improvement.
+- [ ] Add stronger semantic negative examples beyond keyword-list specificity.
 
 ## Source Status Labels
 

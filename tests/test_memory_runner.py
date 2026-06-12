@@ -13,6 +13,7 @@ Source status: local observation
 
 - Keep the four required sections: Source status, Summary, Mechanism, and Engineering takeaway.
 - Preserve the task input source status exactly; do not upgrade inference or paper claims into official facts.
+- Use input-specific evidence in the Mechanism section instead of a generic mechanism template.
 
 ## Leakage Guard
 
@@ -24,6 +25,7 @@ def test_extract_memory_rules() -> None:
     assert extract_memory_rules(MEMORY_TEXT) == [
         "Keep the four required sections: Source status, Summary, Mechanism, and Engineering takeaway.",
         "Preserve the task input source status exactly; do not upgrade inference or paper claims into official facts.",
+        "Use input-specific evidence in the Mechanism section instead of a generic mechanism template.",
     ]
 
 
@@ -45,7 +47,7 @@ def test_memory_enhanced_trace_records_memory_step_and_scores() -> None:
     assert payload["workflow_version"] == "memory-v0"
     assert payload["steps"][1] == {
         "name": "load_reflection_memory",
-        "payload": {"rule_count": 2, "source_status": "local observation"},
+        "payload": {"rule_count": 3, "source_status": "local observation"},
     }
     assert payload["steps"][2] == {
         "name": "format_article_summary",
@@ -57,6 +59,7 @@ def test_memory_enhanced_trace_records_memory_step_and_scores() -> None:
         "source_status_grounding": 1.0,
         "mechanism_coverage": 1.0,
         "engineering_takeaway": 1.0,
+        "input_specificity": 1.0,
     }
 
 
@@ -69,6 +72,7 @@ def test_comparison_report_does_not_claim_improvement_for_score_tie() -> None:
                 "source_status_grounding": 1.0,
                 "mechanism_coverage": 1.0,
                 "engineering_takeaway": 1.0,
+                "input_specificity": 0.0,
             },
         }
     ]
@@ -80,6 +84,7 @@ def test_comparison_report_does_not_claim_improvement_for_score_tie() -> None:
                 "source_status_grounding": 1.0,
                 "mechanism_coverage": 1.0,
                 "engineering_takeaway": 1.0,
+                "input_specificity": 0.0,
             },
         }
     ]
@@ -95,6 +100,30 @@ def test_comparison_report_does_not_claim_improvement_for_score_tie() -> None:
 
     assert comparison["format_validity"]["delta"] == 0.0
     assert "does not prove self-improvement" in report
+
+
+def test_comparison_report_can_link_manual_review() -> None:
+    comparison = {
+        "format_validity": {"baseline": 1.0, "memory": 1.0, "delta": 0.0},
+        "source_status_grounding": {"baseline": 1.0, "memory": 1.0, "delta": 0.0},
+        "mechanism_coverage": {"baseline": 1.0, "memory": 1.0, "delta": 0.0},
+        "engineering_takeaway": {"baseline": 1.0, "memory": 1.0, "delta": 0.0},
+        "input_specificity": {"baseline": 0.0, "memory": 1.0, "delta": 1.0},
+    }
+
+    report = render_comparison_report(
+        comparison,
+        eval_task_path="experiments/tasks/article_summary_eval_v0.jsonl",
+        baseline_trace_path="runs/baseline-v0-eval.jsonl",
+        memory_trace_path="runs/memory-v0-eval.jsonl",
+        memory_path="memories/article-summary-reflection-v0.md",
+        manual_review_path="reports/memory-v0-semantic-review.md",
+        manual_review_summary="directional improvement only.",
+    )
+
+    assert "## Manual Review" in report
+    assert "`reports/memory-v0-semantic-review.md`" in report
+    assert "directional improvement only" in report
 
 
 def test_comparison_requires_same_task_ids() -> None:

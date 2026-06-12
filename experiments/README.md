@@ -54,12 +54,18 @@ python3 experiments/run_memory_enhanced.py
 
 This writes `runs/memory-v0-eval.jsonl` and `reports/baseline-vs-memory-v0.md`. The report must be read as a comparison result, not as proof of improvement.
 
+The first manual semantic review is stored at `reports/memory-v0-semantic-review.md`.
+It currently treats the memory-v0 improvement as narrow but semantically
+plausible under the stricter `input_specificity` rule, while still flagging the
+risk of deterministic template reuse.
+
 ### Metrics
 
 - Format validity.
 - Source-status grounding.
 - Mechanism coverage.
 - Engineering takeaway.
+- Input specificity.
 - Repeated failure count.
 - Manual review notes for high-scoring but bad outputs.
 

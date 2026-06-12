@@ -90,7 +90,7 @@ Engineering takeaway: ...
 
 ```text
 python3 -m pytest
-21 passed
+22 passed
 ```
 
 baseline 运行结果：
@@ -114,6 +114,8 @@ python3 experiments/run_memory_enhanced.py
 Wrote comparison report to /Users/abi/Documents/project/personal/self-improving-agent-lab/reports/baseline-vs-memory-v0.md
 ```
 
+当前报告里 `input_specificity` 从 baseline 的 `0.00` 提升到 memory-v0 的 `1.00`，其他指标不变。这说明 memory 规则确实改变了 held-out eval 输出的一个 rubric 维度。初版人工语义评审发现，单纯追加输入关键词并不足以证明摘要质量变强；因此当前版本已经收紧 `input_specificity`，要求机制段既引用任务输入，也要把输入证据和机制解释连接起来。
+
 一条 trace 的核心字段包括：
 
 ```json
@@ -133,6 +135,7 @@ Wrote comparison report to /Users/abi/Documents/project/personal/self-improving-
   "scores": {
     "engineering_takeaway": 1.0,
     "format_validity": 1.0,
+    "input_specificity": 0.0,
     "mechanism_coverage": 1.0,
     "source_status_grounding": 1.0
   },
@@ -156,13 +159,13 @@ Wrote comparison report to /Users/abi/Documents/project/personal/self-improving-
 
 第三，rubric 可以先粗糙，但必须可解释。当前规则型 evaluator 明显不完美，不过它能暴露 baseline 是如何拿分的，也能暴露自己的误判点。
 
-第四，memory 应该来自失败压缩，而不是来自完整记录堆积。当前第一版 memory 只记录 train split 的聚合分数和保守规则，不写任务标题、正文或答案；由于没有低分失败，而且 memory-v0 在 held-out eval 上没有分数提升，它只能算 preservation memory，还不能算证明了自改进。
+第四，memory 应该来自失败压缩，而不是来自完整记录堆积。当前第一版 memory 只记录 train split 的聚合分数和保守规则，不写任务标题、正文或答案；它让 memory-v0 在 held-out eval 的 `input_specificity` 上拿到提升，但这仍然只是 rubric-level 证据。
 
 第五，这个项目的文章应该跟实验交替推进。代码给文章提供观察对象，文章再把观察转成下一轮实验问题。
 
 下一轮实验可以从两个方向继续：
 
 1. 继续增加 semantic negative examples，防止漂亮但空洞的摘要骗过 rubric。
-2. 实现 memory-enhanced run，并只在 held-out eval split 上和 baseline 对比。
+2. 把当前 deterministic formatter 换成真实 LLM agent，观察真实模型输出里的失败模式。
 
 这篇文章的结论很朴素：**自改进 Agent 的第一步不是让模型变聪明，而是让系统知道自己上一次哪里做得不好。**

@@ -19,6 +19,7 @@ def test_placeholder_output_scores_low() -> None:
         "source_status_grounding": 0.0,
         "mechanism_coverage": 0.0,
         "engineering_takeaway": 0.0,
+        "input_specificity": 0.0,
     }
 
 
@@ -27,10 +28,14 @@ def test_output_scores_when_it_mentions_required_signals() -> None:
         output=(
             "Source status: paper_claims.\n"
             "Summary: The article describes a feedback workflow with trace evidence.\n"
-            "Mechanism: The mechanism is a feedback loop that preserves trace data.\n"
+            "Mechanism: The feedback workflow mechanism shows how iterative refinement connects trace evidence to a better draft.\n"
             "Engineering takeaway: the next step should preserve a rule before changing memory."
         ),
         source_status="paper_claims",
+        task_input={
+            "title": "Self-Refine",
+            "article_excerpt": "Self-Refine uses iterative feedback and refinement with trace evidence.",
+        },
     )
 
     assert scores == {
@@ -38,6 +43,7 @@ def test_output_scores_when_it_mentions_required_signals() -> None:
         "source_status_grounding": 1.0,
         "mechanism_coverage": 1.0,
         "engineering_takeaway": 1.0,
+        "input_specificity": 1.0,
     }
 
 
@@ -60,11 +66,15 @@ def test_evaluate_trace_uses_trace_input_source_status() -> None:
         task_id="summary-001",
         workflow_version="baseline-v0",
         started_at="2026-06-02T00:00:00+00:00",
-        input={"source_status": "author_inference"},
+        input={
+            "source_status": "author_inference",
+            "title": "Trace Discipline",
+            "article_excerpt": "Structured traces preserve observable comparison evidence.",
+        },
         output=(
             "Source status: author inference.\n"
             "Summary: The trace makes the workflow observable.\n"
-            "Mechanism: The mechanism uses trace and workflow comparison.\n"
+            "Mechanism: The Trace Discipline mechanism shows how structured traces preserve observable comparison evidence.\n"
             "Engineering takeaway: keep a rule for source labels."
         ),
     )
@@ -74,6 +84,7 @@ def test_evaluate_trace_uses_trace_input_source_status() -> None:
     assert scores["format_validity"] == 1.0
     assert scores["source_status_grounding"] == 1.0
     assert scores["mechanism_coverage"] == 1.0
+    assert scores["input_specificity"] == 1.0
 
 
 def test_missing_source_status_gets_partial_credit_for_generic_source_note() -> None:
@@ -95,6 +106,7 @@ def test_missing_source_status_gets_partial_credit_for_generic_source_note() -> 
     assert scores["source_status_grounding"] == 0.5
     assert scores["mechanism_coverage"] == 1.0
     assert scores["engineering_takeaway"] == 1.0
+    assert scores["input_specificity"] == 0.0
 
 
 def test_article_summary_evaluator_fixture_cases() -> None:
@@ -106,6 +118,7 @@ def test_article_summary_evaluator_fixture_cases() -> None:
         scores = evaluate_article_summary_output(
             output=case["output"],
             source_status=case["source_status"],
+            task_input=case.get("task_input", {}),
         )
 
         assert scores == case["expected_scores"], case["case_id"]

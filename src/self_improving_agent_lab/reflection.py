@@ -11,6 +11,7 @@ RUBRIC_KEYS = (
     "source_status_grounding",
     "mechanism_coverage",
     "engineering_takeaway",
+    "input_specificity",
 )
 
 
@@ -141,6 +142,8 @@ def _memory_rules_for_scores(low_score_counts: dict[str, int]) -> list[str]:
         rules.append("When mechanism coverage fails, explain the loop, feedback, trace, workflow, or memory relationship directly.")
     if low_score_counts.get("engineering_takeaway", 0):
         rules.append("When takeaway coverage fails, add a concrete next step instead of a generic conclusion.")
+    if low_score_counts.get("input_specificity", 0):
+        rules.append("Use input-specific evidence in the Mechanism section instead of a generic mechanism template.")
     return rules
 
 

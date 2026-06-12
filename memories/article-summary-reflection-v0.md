@@ -18,11 +18,11 @@ This memory is generated only from the article-summary train split.
 - `source_status_grounding`: 1.00
 - `mechanism_coverage`: 1.00
 - `engineering_takeaway`: 1.00
+- `input_specificity`: 0.33
 
 ## Observed Failures
 
-- No low-score train failures were observed in this run.
-- Treat the rules below as preservation rules, not evidence of a memory improvement.
+- `input_specificity` was below 1.0 in 3 train trace(s).
 
 ## Memory Rules
 
@@ -30,6 +30,7 @@ This memory is generated only from the article-summary train split.
 - Preserve the task input source status exactly; do not upgrade inference or paper claims into official facts.
 - Put mechanism evidence in the Mechanism section, not as loose keywords elsewhere.
 - Make the Engineering takeaway actionable by naming a next step, rule, or workflow constraint.
+- Use input-specific evidence in the Mechanism section instead of a generic mechanism template.
 
 ## Leakage Guard
 

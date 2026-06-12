@@ -23,7 +23,9 @@ def test_reflection_memory_uses_train_aggregate_without_eval_leakage() -> None:
     assert "Source status: local observation" in memory_text
     assert "Trace count: 3" in memory_text
     assert "`format_validity`: 1.00" in memory_text
-    assert "No low-score train failures were observed" in memory_text
+    assert "`input_specificity`: 0.33" in memory_text
+    assert "`input_specificity` was below 1.0 in 3 train trace(s)." in memory_text
+    assert "Use input-specific evidence in the Mechanism section" in memory_text
     assert "Task titles, excerpts, and final answers are intentionally omitted." in memory_text
 
     for task in train_tasks + eval_tasks:
@@ -42,6 +44,7 @@ def test_reflection_memory_records_low_score_metrics_without_task_ids() -> None:
                     "source_status_grounding": 0.5,
                     "mechanism_coverage": 0.0,
                     "engineering_takeaway": 1.0,
+                    "input_specificity": 0.0,
                 },
             }
         ],
@@ -51,4 +54,5 @@ def test_reflection_memory_records_low_score_metrics_without_task_ids() -> None:
 
     assert "`source_status_grounding` was below 1.0 in 1 train trace(s)." in memory_text
     assert "`mechanism_coverage` was below 1.0 in 1 train trace(s)." in memory_text
+    assert "`input_specificity` was below 1.0 in 1 train trace(s)." in memory_text
     assert "summary-train-999" not in memory_text

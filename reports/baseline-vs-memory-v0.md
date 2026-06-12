@@ -17,13 +17,19 @@ Source status: local observation
 | `source_status_grounding` | 1.00 | 1.00 | 0.00 |
 | `mechanism_coverage` | 1.00 | 1.00 | 0.00 |
 | `engineering_takeaway` | 1.00 | 1.00 | 0.00 |
+| `input_specificity` | 0.00 | 1.00 | 1.00 |
 
 ## Conclusion
 
-Memory-v0 produced no rubric-score improvement; this run does not prove self-improvement.
+Memory-v0 produced a rubric-level improvement on at least one metric without a score regression.
+
+## Manual Review
+
+- Review path: `reports/memory-v0-semantic-review.md`
+- Current review status: task-specific mechanism improvement passes the stricter review, with residual risk from deterministic template reuse.
 
 ## Interpretation Guard
 
 - A score tie is not evidence that memory helped.
-- This report compares aggregate rubric scores only; manual review is still required.
-- The memory file is preservation-oriented because no low-score train failures were observed.
+- Manual review is required for any claimed semantic improvement.
+- A rubric-score improvement is only meaningful when the changed metric reflects a real quality gap.
